@@ -30,11 +30,14 @@ const App: React.FC = () => {
 
   // --- Helpers ---
   const resetLevel = useCallback(() => {
-    setRobotPos(level.start);
+    // Force a new object reference for position to ensure re-render
+    setRobotPos({ ...level.start });
     setRobotDir(Direction.RIGHT); 
     setGameStatus(GameStatus.PLANNING);
     setActiveCommandIndex(null);
-    shouldStopRef.current = false;
+    // Note: We do NOT set shouldStopRef.current = false here.
+    // If this was called by stopSimulation, we need the flag to remain true
+    // so the running loop detects it and exits.
   }, [level]);
 
   const clearCommands = useCallback(() => {
@@ -57,7 +60,6 @@ const App: React.FC = () => {
     if (currentIndex !== -1 && currentIndex < PREDEFINED_LEVELS.length - 1) {
       loadLevel(PREDEFINED_LEVELS[currentIndex + 1]);
     } else {
-      // Loop back or generate AI level? Let's generate AI for endless fun
       handleGenerateLevel();
     }
   };
@@ -112,47 +114,67 @@ const App: React.FC = () => {
     if (gameStatusRef.current === GameStatus.RUNNING) return;
 
     setGameStatus(GameStatus.RUNNING);
-    shouldStopRef.current = false;
+    shouldStopRef.current = false; // Explicitly reset stop flag before starting
     
-    let currentPos = { ...level.start };
-    setRobotPos(currentPos);
-    
-    await new Promise(r => setTimeout(r, 500));
+    try {
+        let currentPos = { ...level.start };
+        setRobotPos(currentPos);
+        setRobotDir(Direction.RIGHT);
+        
+        // Initial delay to show start position
+        await new Promise(r => setTimeout(r, 500));
 
-    for (let i = 0; i < commandsRef.current.length; i++) {
-      if (shouldStopRef.current) break;
-      
-      setActiveCommandIndex(i);
-      // Scroll strip to keep active command in view
-      const cardId = `cmd-card-${i}`;
-      document.getElementById(cardId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        for (let i = 0; i < commandsRef.current.length; i++) {
+          // Check if stopped before executing command
+          if (shouldStopRef.current) break;
+          
+          setActiveCommandIndex(i);
+          const cardId = `cmd-card-${i}`;
+          document.getElementById(cardId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 
-      const cmd = commandsRef.current[i];
-      let nextPos = { ...currentPos };
+          const cmd = commandsRef.current[i];
+          let nextPos = { ...currentPos };
 
-      switch (cmd) {
-        case Direction.UP: nextPos.y -= 1; break;
-        case Direction.DOWN: nextPos.y += 1; break;
-        case Direction.LEFT: nextPos.x -= 1; break;
-        case Direction.RIGHT: nextPos.x += 1; break;
-      }
+          switch (cmd) {
+            case Direction.UP: nextPos.y -= 1; break;
+            case Direction.DOWN: nextPos.y += 1; break;
+            case Direction.LEFT: nextPos.x -= 1; break;
+            case Direction.RIGHT: nextPos.x += 1; break;
+          }
 
-      setRobotDir(cmd); 
-      await new Promise(r => setTimeout(r, 600));
+          setRobotDir(cmd); 
+          
+          // Wait for move animation
+          await new Promise(r => setTimeout(r, 600));
+          
+          // Check if stopped during the wait
+          if (shouldStopRef.current) break;
 
-      if (checkCollision(nextPos)) {
+          if (checkCollision(nextPos)) {
+            setGameStatus(GameStatus.FAILED);
+            return;
+          }
+
+          currentPos = nextPos;
+          setRobotPos(currentPos);
+        }
+
+        // If manually stopped, ensure we return to planning without a result
+        if (shouldStopRef.current) {
+            setGameStatus(GameStatus.PLANNING); 
+            return;
+        }
+
+        // Check Goal
+        if (currentPos.x === level.goal.x && currentPos.y === level.goal.y) {
+          setGameStatus(GameStatus.SUCCESS);
+        } else {
+          setGameStatus(GameStatus.FAILED);
+        }
+
+    } catch (error) {
+        console.error("Simulation error:", error);
         setGameStatus(GameStatus.FAILED);
-        return;
-      }
-
-      currentPos = nextPos;
-      setRobotPos(currentPos);
-    }
-
-    if (currentPos.x === level.goal.x && currentPos.y === level.goal.y) {
-      setGameStatus(GameStatus.SUCCESS);
-    } else {
-      setGameStatus(GameStatus.FAILED);
     }
   };
 
@@ -309,30 +331,41 @@ const App: React.FC = () => {
         </div>
 
         {/* RIGHT/BOTTOM: Control Center */}
-        <div className="shrink-0 bg-white/90 backdrop-blur-xl border-t-2 lg:border-t-0 lg:border-l-2 border-slate-100 lg:w-[500px] flex flex-col z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[24px] lg:rounded-none pb-4 md:pb-6 lg:pb-0">
+        <div className="
+          shrink-0 
+          bg-white/75 backdrop-blur-2xl 
+          border-t-[6px] lg:border-t-0 lg:border-l-[6px] border-white/40 
+          lg:w-[520px] 
+          flex flex-col 
+          z-20 
+          shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.25)] 
+          rounded-t-[3rem] lg:rounded-t-none lg:rounded-l-[3rem] 
+          pb-8 md:pb-10 lg:pb-0 
+          transition-all duration-500
+        ">
           
           {/* Draggable Handle for Mobile (Visual only) */}
-          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-2 lg:hidden opacity-50" />
+          <div className="w-16 h-1.5 bg-slate-400/40 rounded-full mx-auto mt-4 mb-3 lg:hidden" />
 
           {/* 1. Command Strip (The Code) */}
-          <div className="px-2 md:px-4 py-2 md:py-3 shrink-0">
-             <div className="flex justify-between items-end mb-1 md:mb-2">
+          <div className="px-4 md:px-6 py-2 md:py-4 shrink-0">
+             <div className="flex justify-between items-end mb-2 md:mb-3">
                 <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-green-500 animate-pulse" />
-                   <span className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider">Main Sequence</span>
+                   <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500 animate-pulse shadow-lg shadow-green-400/50" />
+                   <span className="text-xs md:text-sm font-black text-slate-600 uppercase tracking-widest drop-shadow-sm">Main Sequence</span>
                 </div>
                 <button 
                   onClick={clearCommands} 
-                  className="text-xs md:text-sm font-bold text-red-400 hover:text-red-500 px-2 py-1 rounded hover:bg-red-50 transition-colors flex items-center gap-1"
+                  className="text-xs md:text-sm font-bold text-red-500 hover:text-red-600 px-3 py-1.5 rounded-lg hover:bg-red-50/80 transition-colors flex items-center gap-1.5 backdrop-blur-sm"
                 >
-                   <Trash size={14} /> ลบทั้งหมด
+                   <Trash size={16} /> ลบทั้งหมด
                 </button>
              </div>
              
              {/* Scrollable Container */}
              <div 
                id="command-strip"
-               className="bg-slate-100/50 border-2 border-slate-200 rounded-2xl h-24 md:h-32 flex items-center px-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth snap-x"
+               className="bg-slate-50/50 border-2 border-white/60 rounded-2xl h-28 md:h-36 flex items-center px-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth snap-x shadow-inner"
              >
                 {commands.length === 0 && (
                    <div className="w-full text-center text-slate-400 text-xs md:text-base font-bold animate-pulse px-4">
@@ -357,11 +390,11 @@ const App: React.FC = () => {
           </div>
 
           {/* 2. Control Pad */}
-          <div className="flex-1 px-2 md:px-4 lg:p-8 bg-white/0 flex flex-row lg:flex-col gap-2 md:gap-4 lg:gap-8 items-center justify-between lg:justify-center">
+          <div className="flex-1 px-4 md:px-6 lg:p-8 bg-white/0 flex flex-row lg:flex-col gap-3 md:gap-5 lg:gap-8 items-center justify-between lg:justify-center">
              
              {/* Direction Arrows */}
              <div className="flex-1 flex justify-center items-center lg:flex-none lg:w-full">
-                <div className="grid grid-cols-3 gap-2 md:gap-3 p-2 md:p-4 bg-slate-50 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-inner transform scale-100 lg:scale-110 transition-transform">
+                <div className="grid grid-cols-3 gap-2 md:gap-3 p-4 md:p-6 bg-white/50 rounded-3xl md:rounded-[2.5rem] border-2 border-white/60 shadow-[inset_0_2px_10px_rgba(0,0,0,0.05)] backdrop-blur-sm transform scale-100 lg:scale-110 transition-transform">
                    <div className="col-start-2">
                       <CommandCard command={Direction.UP} isControl onClick={() => addCommand(Direction.UP)} shortcut="↑" />
                    </div>
@@ -398,7 +431,7 @@ const App: React.FC = () => {
                         group relative overflow-hidden
                         py-3 md:py-4 lg:py-6 rounded-xl md:rounded-2xl font-black text-base md:text-xl lg:text-3xl border-b-[4px] lg:border-b-[8px] active:border-b-0 active:translate-y-2 transition-all shadow-xl flex flex-col lg:flex-row items-center justify-center gap-1 md:gap-3
                         ${commands.length === 0 
-                          ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' 
+                          ? 'bg-slate-200/80 text-slate-400 border-slate-300 cursor-not-allowed backdrop-blur-sm' 
                           : 'bg-green-500 hover:bg-green-400 text-white border-green-700 shadow-green-200'
                         }
                       `}
