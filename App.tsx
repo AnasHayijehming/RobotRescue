@@ -269,16 +269,13 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         
         {/* LEFT/TOP: Game Board */}
-        <div className="flex-1 flex flex-col relative items-center justify-center p-2 md:p-4 lg:p-8 min-h-0">
+        <div className="flex-1 flex flex-col relative items-center justify-center p-1 md:p-2 lg:p-4 min-h-0">
           
           {/* The Board Background Card 
-              Updated to ensure proper square aspect ratio and responsive sizing using clamp/min logic
+              Updated to maximize screen usage.
           */}
           <div 
-             className="relative z-10 bg-white p-2 rounded-2xl shadow-2xl border-4 border-slate-100 ring-1 ring-slate-200/50 transition-all flex items-center justify-center aspect-square mx-auto"
-             style={{
-               width: 'min(100% - 24px, 500px, 50dvh)', 
-             }}
+             className="relative z-10 bg-white p-2 rounded-2xl shadow-2xl border-4 border-slate-100 ring-1 ring-slate-200/50 transition-all flex items-center justify-center aspect-square mx-auto w-full max-w-[min(92vw,55vh)] lg:max-w-[85vh]"
           >
              {/* The Grid */}
              <div 
@@ -312,34 +309,34 @@ const App: React.FC = () => {
         </div>
 
         {/* RIGHT/BOTTOM: Control Center */}
-        <div className="shrink-0 bg-white/90 backdrop-blur-xl border-t-2 lg:border-t-0 lg:border-l-2 border-slate-100 lg:w-[420px] flex flex-col z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[24px] lg:rounded-none pb-4 md:pb-6 lg:pb-0">
+        <div className="shrink-0 bg-white/90 backdrop-blur-xl border-t-2 lg:border-t-0 lg:border-l-2 border-slate-100 lg:w-[500px] flex flex-col z-20 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] rounded-t-[24px] lg:rounded-none pb-4 md:pb-6 lg:pb-0">
           
           {/* Draggable Handle for Mobile (Visual only) */}
-          <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mt-2 mb-1 lg:hidden opacity-50" />
+          <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mt-3 mb-2 lg:hidden opacity-50" />
 
           {/* 1. Command Strip (The Code) */}
-          <div className="px-2 md:px-4 py-1 md:py-2 shrink-0">
+          <div className="px-2 md:px-4 py-2 md:py-3 shrink-0">
              <div className="flex justify-between items-end mb-1 md:mb-2">
                 <div className="flex items-center gap-2">
-                   <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-green-500 animate-pulse" />
-                   <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Main Sequence</span>
+                   <div className="w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-green-500 animate-pulse" />
+                   <span className="text-xs md:text-sm font-bold text-slate-500 uppercase tracking-wider">Main Sequence</span>
                 </div>
                 <button 
                   onClick={clearCommands} 
-                  className="text-[10px] md:text-xs font-bold text-red-400 hover:text-red-500 px-2 py-1 rounded hover:bg-red-50 transition-colors flex items-center gap-1"
+                  className="text-xs md:text-sm font-bold text-red-400 hover:text-red-500 px-2 py-1 rounded hover:bg-red-50 transition-colors flex items-center gap-1"
                 >
-                   <Trash size={12} /> ลบทั้งหมด
+                   <Trash size={14} /> ลบทั้งหมด
                 </button>
              </div>
              
              {/* Scrollable Container */}
              <div 
                id="command-strip"
-               className="bg-slate-100/50 border-2 border-slate-200 rounded-2xl h-16 md:h-20 md:h-28 flex items-center px-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth snap-x"
+               className="bg-slate-100/50 border-2 border-slate-200 rounded-2xl h-24 md:h-32 flex items-center px-2 gap-2 overflow-x-auto no-scrollbar scroll-smooth snap-x"
              >
                 {commands.length === 0 && (
-                   <div className="w-full text-center text-slate-400 text-[10px] md:text-sm font-medium animate-pulse px-4">
-                     กดปุ่มลูกศรเพื่อวางแผน...
+                   <div className="w-full text-center text-slate-400 text-xs md:text-base font-bold animate-pulse px-4">
+                     กดปุ่มลูกศรด้านล่างเพื่อวางแผน...
                    </div>
                 )}
                 
@@ -355,16 +352,16 @@ const App: React.FC = () => {
                 ))}
                 
                 {/* Placeholder ghost card at end */}
-                <div className="w-4 shrink-0" />
+                <div className="w-6 shrink-0" />
              </div>
           </div>
 
           {/* 2. Control Pad */}
-          <div className="flex-1 px-2 md:px-4 lg:p-8 bg-white/0 flex flex-row lg:flex-col gap-2 md:gap-4 lg:gap-6 items-center justify-between lg:justify-center">
+          <div className="flex-1 px-2 md:px-4 lg:p-8 bg-white/0 flex flex-row lg:flex-col gap-2 md:gap-4 lg:gap-8 items-center justify-between lg:justify-center">
              
              {/* Direction Arrows */}
              <div className="flex-1 flex justify-center items-center lg:flex-none lg:w-full">
-                <div className="grid grid-cols-3 gap-1 md:gap-3 p-1.5 md:p-3 bg-slate-50 rounded-2xl md:rounded-3xl border border-slate-100 shadow-inner transform scale-100 lg:scale-110 transition-transform">
+                <div className="grid grid-cols-3 gap-2 md:gap-3 p-2 md:p-4 bg-slate-50 rounded-2xl md:rounded-[2rem] border border-slate-100 shadow-inner transform scale-100 lg:scale-110 transition-transform">
                    <div className="col-start-2">
                       <CommandCard command={Direction.UP} isControl onClick={() => addCommand(Direction.UP)} shortcut="↑" />
                    </div>
@@ -381,14 +378,14 @@ const App: React.FC = () => {
              </div>
 
              {/* Action Buttons (Play/Stop/Reset) */}
-             <div className="flex flex-col gap-1.5 md:gap-3 w-[100px] xs:w-[130px] md:w-[160px] lg:w-full lg:max-w-[320px] items-stretch justify-center">
+             <div className="flex flex-col gap-2 md:gap-3 lg:gap-4 w-[110px] xs:w-[140px] md:w-[180px] lg:w-full lg:max-w-[360px] items-stretch justify-center">
                 
                 {gameStatus === GameStatus.RUNNING ? (
                   <button 
                     onClick={stopSimulation}
-                    className="h-auto py-3 md:py-4 lg:py-6 bg-red-500 hover:bg-red-400 text-white rounded-xl md:rounded-2xl font-bold text-sm md:text-xl border-b-[4px] md:border-b-[6px] border-red-700 active:border-b-0 active:translate-y-1.5 transition-all shadow-xl shadow-red-200 flex flex-col lg:flex-row items-center justify-center gap-1 md:gap-2"
+                    className="h-auto py-3 md:py-4 lg:py-6 bg-red-500 hover:bg-red-400 text-white rounded-xl md:rounded-2xl font-bold text-sm md:text-2xl border-b-[4px] md:border-b-[6px] border-red-700 active:border-b-0 active:translate-y-1.5 transition-all shadow-xl shadow-red-200 flex flex-col lg:flex-row items-center justify-center gap-1 md:gap-2"
                   >
-                    <div className="p-1 bg-red-600 rounded-full"><X size={20} className="w-4 h-4 md:w-7 md:h-7" /></div>
+                    <div className="p-1 bg-red-600 rounded-full"><X size={24} className="w-5 h-5 md:w-8 md:h-8" /></div>
                     <span>หยุด</span>
                   </button>
                 ) : (
@@ -399,15 +396,15 @@ const App: React.FC = () => {
                       disabled={commands.length === 0}
                       className={`
                         group relative overflow-hidden
-                        py-2 md:py-3 lg:py-5 rounded-xl md:rounded-2xl font-black text-sm md:text-lg lg:text-2xl border-b-[4px] lg:border-b-[8px] active:border-b-0 active:translate-y-2 transition-all shadow-xl flex flex-col lg:flex-row items-center justify-center gap-0.5 md:gap-3
+                        py-3 md:py-4 lg:py-6 rounded-xl md:rounded-2xl font-black text-base md:text-xl lg:text-3xl border-b-[4px] lg:border-b-[8px] active:border-b-0 active:translate-y-2 transition-all shadow-xl flex flex-col lg:flex-row items-center justify-center gap-1 md:gap-3
                         ${commands.length === 0 
                           ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' 
                           : 'bg-green-500 hover:bg-green-400 text-white border-green-700 shadow-green-200'
                         }
                       `}
                     >
-                      <div className={`p-1 rounded-full transition-transform group-hover:scale-110 ${commands.length > 0 ? 'bg-white/20' : 'bg-transparent'}`}>
-                        <Play fill="currentColor" className={`w-4 h-4 md:w-6 md:h-6 lg:w-8 lg:h-8 ${commands.length > 0 ? "ml-0.5" : ""}`} /> 
+                      <div className={`p-1.5 rounded-full transition-transform group-hover:scale-110 ${commands.length > 0 ? 'bg-white/20' : 'bg-transparent'}`}>
+                        <Play fill="currentColor" className={`w-5 h-5 md:w-7 md:h-7 lg:w-10 lg:h-10 ${commands.length > 0 ? "ml-0.5" : ""}`} /> 
                       </div>
                       <span>รันคำสั่ง!</span>
                     </button>
@@ -416,9 +413,9 @@ const App: React.FC = () => {
                     <button 
                       onClick={resetLevel}
                       disabled={gameStatus === GameStatus.RUNNING}
-                      className="py-1.5 md:py-2 lg:py-3 bg-amber-400 hover:bg-amber-300 text-amber-900 rounded-lg md:rounded-xl font-bold text-xs md:text-sm lg:text-lg border-b-[3px] md:border-b-[4px] border-amber-600 active:border-b-0 active:translate-y-1 transition-all shadow-sm flex items-center justify-center gap-2"
+                      className="py-2 md:py-3 lg:py-4 bg-amber-400 hover:bg-amber-300 text-amber-900 rounded-lg md:rounded-xl font-bold text-sm md:text-base lg:text-xl border-b-[3px] md:border-b-[5px] border-amber-600 active:border-b-0 active:translate-y-1 transition-all shadow-sm flex items-center justify-center gap-2"
                     >
-                       <RefreshCw className="w-3 h-3 md:w-[18px] md:h-[18px] lg:w-6 lg:h-6" />
+                       <RefreshCw className="w-4 h-4 md:w-5 md:h-5 lg:w-7 lg:h-7" />
                        <span>เริ่มใหม่</span>
                     </button>
                   </div>

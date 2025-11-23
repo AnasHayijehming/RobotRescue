@@ -38,14 +38,14 @@ const GridCell: React.FC<GridCellProps> = ({ x, y, type, isRobotHere, robotDirec
       `}
     >
       {/* Coordinates (Debug/Learning) */}
-      <span className="absolute top-1 left-1.5 text-[8px] md:text-[10px] text-slate-300 font-bold font-mono">
+      <span className="absolute top-1 left-1.5 text-[10px] md:text-xs text-slate-400 font-bold font-mono opacity-70">
         {x},{y}
       </span>
 
       {/* Render Obstacle (3D Rock effect) */}
       {type === CellType.OBSTACLE && (
         <div className="w-full h-full flex items-center justify-center">
-            <Box className="w-3/5 h-3/5 text-stone-200" strokeWidth={1.5} />
+            <Box className="w-2/3 h-2/3 text-stone-200" strokeWidth={2} />
             <div className="absolute inset-0 bg-stone-500 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-transparent to-black/20"></div>
         </div>
       )}
@@ -53,16 +53,16 @@ const GridCell: React.FC<GridCellProps> = ({ x, y, type, isRobotHere, robotDirec
       {/* Render Start Marker */}
       {type === CellType.START && !isRobotHere && (
         <div className="opacity-30 flex flex-col items-center">
-            <div className="w-2 h-2 rounded-full bg-blue-300 mb-1"></div>
-            <span className="text-[8px] font-bold text-blue-300 uppercase">Start</span>
+            <div className="w-2.5 h-2.5 rounded-full bg-blue-300 mb-1"></div>
+            <span className="text-[9px] font-bold text-blue-300 uppercase">Start</span>
         </div>
       )}
 
       {/* Render Goal */}
       {type === CellType.GOAL && !isRobotHere && (
-        <div className="animate-pulse w-full h-full flex items-center justify-center p-2">
+        <div className="animate-pulse w-full h-full flex items-center justify-center p-1.5 md:p-2">
            <div className="w-full h-full border-2 border-dashed border-green-300 rounded-lg flex items-center justify-center bg-green-100/50">
-             <BatteryCharging className="w-2/3 h-2/3 text-green-500 fill-green-100" />
+             <BatteryCharging className="w-2/3 h-2/3 text-green-500 fill-green-100" strokeWidth={2.5} />
            </div>
         </div>
       )}
@@ -70,8 +70,8 @@ const GridCell: React.FC<GridCellProps> = ({ x, y, type, isRobotHere, robotDirec
       {/* Render Robot */}
       {isRobotHere && (
         <div className={`absolute inset-0 z-10 flex items-center justify-center transition-transform duration-500 ease-in-out ${getRotationClass(robotDirection)}`}>
-           <div className="relative w-[80%] h-[80%] flex items-center justify-center filter drop-shadow-xl">
-              <Bot className="w-full h-full text-blue-600 fill-blue-50" strokeWidth={1.5} />
+           <div className="relative w-[85%] h-[85%] flex items-center justify-center filter drop-shadow-xl">
+              <Bot className="w-full h-full text-blue-600 fill-blue-50" strokeWidth={2} />
               {/* Eyes */}
               <div className="absolute top-[32%] left-[28%] w-[12%] h-[12%] bg-cyan-300 rounded-full animate-ping" />
               <div className="absolute top-[32%] right-[28%] w-[12%] h-[12%] bg-cyan-300 rounded-full animate-ping" />
